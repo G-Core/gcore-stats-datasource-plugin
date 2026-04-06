@@ -1,0 +1,145 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "datasource",
+  "name": "Gcore Platform-EN",
+  "id": "gcore-stats-datasource-plugin",
+  "metrics": true,
+  "backend": true,
+  "alerting": true,
+  "executable": "gcore-stats-datasource-plugin",
+  "info": {
+    "description": "Datasource for querying metrics across the Gcore platform, including CDN, DNS, FastEdge and WAAP",
+    "author": {
+      "name": "G-Core",
+      "url": "https://gcore.com/",
+      "email": "support@gcore.com"
+    },
+    "keywords": [
+      "gcore",
+      "cdn",
+      "dns",
+      "fastedge",
+      "waap",
+      "statistics"
+    ],
+    "logos": {
+      "small": "img/logo-small.svg",
+      "large": "img/logo-large.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://gcore.com/"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=12.0.0",
+    "plugins": []
+  },
+  "routes": [
+    {
+      "path": "cdn/statistics/aggregate/stats",
+      "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/cdn/statistics/aggregate/stats",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "cdn/resources",
+      "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/cdn/resources",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "dns/zones",
+      "url": "https://{{if .JsonData.apiUrl}}{{.JsonData.apiUrl}}{{else}}api.gcore.com{{end}}/dns/v2/zones",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "dns/zones/all/statistics",
+      "url": "https://{{if .JsonData.apiUrl}}{{.JsonData.apiUrl}}{{else}}api.gcore.com{{end}}/dns/v2/zones/all/statistics",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "fastedge/apps",
+      "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/fastedge/v1/apps",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "fastedge/stats/app_duration",
+      "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/fastedge/v1/stats/app_duration",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "waap/analytics/requests",
+      "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/waap/v1/analytics/requests",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "waap/statistics/series",
+      "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/waap/v1/statistics/series",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "users/me",
+      "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/users/me",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    },
+    {
+      "path": "iam/users/me",
+      "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/iam/users/me",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "APIKey {{ .SecureJsonData.apiKey }}"
+        }
+      ]
+    }
+  ]
+}
