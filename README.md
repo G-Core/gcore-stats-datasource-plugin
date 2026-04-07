@@ -1,192 +1,203 @@
-# View Gcore statistics in Grafana
+# Gcore Grafana Data Source Plugin
 
-This guide walks through installing and using the **Gcore Platform** Grafana data source plugin (**Gcore Platform-EN**, id `gcore-stats-datasource-plugin`). It is the same kind of end-to-end documentation as [View CDN statistics in Grafana](https://gcore.com/docs/cdn/grafana/view-cdn-statistics-in-grafana) on the Gcore docs site, but updated for the unified plugin that covers **CDN**, **DNS**, **FastEdge**, and **WAAP** in one data source.
+This plugin connects Grafana to multiple Gcore edge services, providing a unified query model for visualizing both operational and security metrics across **CDN**, **DNS**, **FastEdge**, and **WAAP**, so instead of managing separate datasources or query editors you select the **Service** once and work with a single, consistent panel experience for all four products.
 
-Screenshots in this file live under `src/img/GcoreDocsImages` in the repository.
+## Documentation
 
-## What you can visualize
+For a **step-by-step guide** (install, API key, panels per product, dashboard variables) in the style of [View CDN statistics in Grafana](https://gcore.com/docs/cdn/grafana/view-cdn-statistics-in-grafana), see **[docs/GcoreDocsMD.md](docs/GcoreDocsMD.md)**. Screenshots use images under `src/img/GcoreDocsImages/`.
+
+## Overview
+---
+
+Grafana supports a wide range of data sources, including Prometheus, MySQL, and Datadog.
+This plugin adds native support for Gcore APIs so you can build dashboards directly on top of Gcore traffic and security telemetry.
+
+The data source currently supports the following Gcore products:
+
+- **CDN** – delivery traffic, bandwidth, cache efficiency, and request statistics.
+- **FastEdge** – application latency and performance metrics from edge applications.
+- **WAAP** – web application and API protection statistics, including request volumes and traffic data.
+- **DNS** – authoritative DNS traffic statistics per zone and record type.
+
+## Product-specific capabilities
+---
 
 ### CDN
 
-With the CDN service selected in the query editor, you can chart metrics such as:
+#### What is the CDN data source?
 
-- **Total Traffic** — total traffic volume (origin/shield/edge/user paths as exposed by the API).
-- **Byte Cache Hit Ratio** — share of traffic served from cache (byte-oriented ratio).
-- **Edges Traffic** — traffic from the edge toward clients.
-- **Shield Traffic** — traffic involving [shielding](https://gcore.com/cdn/cdn-resource-options/general/enable-and-configure-origin-shielding).
-- **Origin Traffic** — traffic from the origin toward CDN/shield.
-- **Total Requests** — request counts to the CDN.
-- **2xx / 3xx / 4xx / 5xx Responses** — HTTP response class counts.
-- **Bandwidth** — derived from total traffic for rate-style views.
-- **Cache Hit Ratio** — request-oriented cache hit ratio.
-- **Shield Traffic Ratio** — shield efficiency as returned by the API.
-- **Image optimization** — image processing volume where available.
+The CDN service view connects Grafana to Gcore CDN statistics, focusing on delivery traffic, cache efficiency, and request/response trends.
+It is suited for traffic analysis, capacity planning, and day‑to‑day operational monitoring of HTTP delivery.
 
-You can **group** CDN series by **Client**, **Resource**, **Region**, **Country**, **Datacenter**, and **Vhost**.
+#### Key features
 
-For more CDN context, see [Gcore CDN documentation](https://gcore.com/docs/cdn).
+- Visualize metrics such as total bytes, upstream bytes, cache hit ratios, and request/response counts.
+- Filter by vhosts, resources, clients, regions, and countries using comma-separated filters.
+- Group series by resource, client, region, country, vhost, or data center for multi-dimensional charts.
+- Customize legend format to align series names with your dashboard conventions.
 
-### DNS, FastEdge, and WAAP
+#### Find More
 
-- **DNS** — zone-level statistics, record types, and DNS-specific granularities.
-- **FastEdge** — application duration statistics (avg, min, max, median, percentiles) with app and optional network filters.
-- **WAAP** — `total_requests` and `total_bytes` with hourly or daily buckets.
+If you want to learn more about Gcore CDN and how its APIs work, see the official documentation at `https://gcore.com/docs/cdn` and the API reference at `https://gcore.com/docs/api-reference/overview`.
+
+![CDN query editor](src/img/Service%20Images/CDNGraphImage.png)
 
 ---
 
-## Requirements
+### DNS
 
-- **Grafana** version **12.0 or higher** (see `grafanaDependency` in `src/plugin.json`).
-- A Gcore account with a **permanent API token** that can access the products you query.
+#### What is the DNS data source?
 
----
+The DNS service view provides visibility into authoritative DNS traffic across zones and record types.
+It helps you monitor query volume, understand load distribution, and validate DNS changes.
 
-## Step 1 — Download and install the plugin
+#### Key features
 
-1. Download the latest release asset for this plugin (for example a `dist.zip` or packaged archive) from  
-   **[github.com/G-Core/gcore-stats-datasource-plugin/releases](https://github.com/G-Core/gcore-stats-datasource-plugin/releases)**.
-2. Extract the plugin into your Grafana plugins directory (for example `grafana/data/plugins`; the exact path depends on your install).
-3. If the plugin is not signed for your Grafana edition, allow it in Grafana configuration, for example:
+- Query statistics per zone or across all zones, with an "All Zones" option.
+- Filter by DNS record type (A, AAAA, NS, CNAME, MX, TXT, SVCB, HTTPS).
+- Control aggregation using DNS-specific time granularities from 5 minutes up to 24 hours.
+- Customize legend format (for example using zone and record type) for clear time-series labels.
 
-   ```ini
-   [plugins]
-   allow_loading_unsigned_plugins = gcore-stats-datasource-plugin
-   ```
+#### Find More
 
-4. [Restart Grafana](https://grafana.com/docs/grafana/latest/installation/restart-grafana/) and sign in.
+If you want to learn more about Gcore DNS and how its APIs work, see the official documentation at `https://gcore.com/docs/dns` and the Managed DNS product page at `https://gcore.com/dns`.
 
-For a developer-oriented build-from-source flow, see the root [README.md](../README.md).
+![DNS query editor](src/img/Service%20Images/DnsGraphImage.png)
 
 ---
 
-## Step 2 — Add the data source and authenticate
+### FastEdge
 
-1. Open **Connections → Data sources** (or **Configuration → Data sources** on older layouts).
-2. Click **Add new data source** and search for **Gcore Platform-EN** (or the name shown in Grafana for this plugin).
-3. Configure:
-   - **URL** — API hostname, for example `api.gcore.com` (hostname only; no path). Leave default behavior or set a supported API host per your environment.
-   - **API key** — your permanent API token. The plugin stores this securely; you may prefix with `APIKey ` if that is how you copy it from Gcore (the editor normalizes the value on save).
+#### What is the FastEdge data source?
 
-   ![Data source: URL and API key](../src/img/GcoreDocsImages/Login/Login.png)
+The FastEdge service view exposes application latency and performance metrics for Gcore edge applications.
+It helps you understand response times, spot regressions, and compare deployments across networks or applications.
 
-4. Click **Save & test**. You should see a successful health check (for example authentication as your user).
+#### Key features
 
-Official reference for tokens: [Create, use, or delete a permanent API token](https://gcore.com/docs/account-settings/create-use-or-delete-a-permanent-api-token).
+- Query application duration metrics (average, min, max, median, p75, p90) over time.
+- Select a specific application or use an "All apps" view from the built‑in app selector.
+- Control sampling step (granularity in seconds) to match the desired time-series resolution.
+- Optionally filter by network name to focus on a particular FastEdge network.
 
----
+#### Find More
 
-## Step 3 — Build a dashboard and run queries
+If you want to learn more about Gcore FastEdge and how its APIs work, see the official documentation at `https://gcore.com/docs/fastedge` and the getting started guide at `https://gcore.com/docs/fastedge/getting-started`.
 
-1. Create a **New dashboard** and **Add visualization** (or add a panel).
-2. Select your **Gcore** data source.
-3. In the query editor, choose the **product** (**CDN**, **DNS**, **FastEdge**, or **WAAP**), then set metrics, granularity, filters, and legend options as described below.
 
-### CDN panel setup
 
-1. Set **Service** / product to **CDN**.
-
-   ![Select CDN service](../src/img/GcoreDocsImages/CDN/CdnSelect.png)
-
-2. Pick the **metric**, **granularity**, and **Group by** dimensions you need. Use **Filters (comma separated)** to narrow resources, vhosts, clients, regions, or countries as supported by the API.
-
-   ![CDN metric and granularity](../src/img/GcoreDocsImages/CDN/CdnMetric.png)
-
-   ![CDN granularity option](../src/img/GcoreDocsImages/CDN/CdnGranulaity.png)
-
-   ![CDN group by](../src/img/GcoreDocsImages/CDN/CdnGroupby.png)
-
-3. **Legend** — Grafana shows group-by fields and metric names by default. You can use a custom legend string with `{{fieldName}}` placeholders to match your dashboard style (for example `Traffic — {{resource}}`).
-
-Example overview screenshot:
-
-![CDN query overview](../src/img/GcoreDocsImages/CDN/CdnImage.png)
-
-CDN reference on gcore.com (metrics concepts): [View CDN statistics in Grafana](https://gcore.com/docs/cdn/grafana/view-cdn-statistics-in-grafana).
-
-### DNS panel setup
-
-1. Select **DNS** as the product.
-
-   ![Select DNS](../src/img/GcoreDocsImages/DNS/DNS.png)
-
-   ![DNS query editor](../src/img/GcoreDocsImages/DNS/DnsSelect.png)
-
-2. Choose **Zone** (including **All Zones** where applicable), **Record type**, and **Granularity**.
-
-   ![DNS zone](../src/img/GcoreDocsImages/DNS/DnsZone.png)
-
-   ![DNS record type](../src/img/GcoreDocsImages/DNS/DnsRecordType.png)
-
-   ![DNS granularity](../src/img/GcoreDocsImages/DNS/DnsGranuality.png)
-
-### FastEdge panel setup
-
-1. Select **FastEdge**.
-
-   ![Select FastEdge](../src/img/GcoreDocsImages/FastEdge/FastEdge.png)
-
-   ![FastEdge service selection](../src/img/GcoreDocsImages/FastEdge/FastedgeSelect.png)
-
-2. Choose duration **metric** (avg, min, max, median, percentiles), **App**, **Step** (sampling), and optional network filter if shown.
-
-   ![FastEdge metric](../src/img/GcoreDocsImages/FastEdge/FastEdgeMetric.png)
-
-   ![FastEdge app](../src/img/GcoreDocsImages/FastEdge/FastEdgeAppName.png)
-
-   ![FastEdge step](../src/img/GcoreDocsImages/FastEdge/FastEdgeStep.png)
-
-### WAAP panel setup
-
-1. Select **WAAP**.
-
-   ![Select WAAP](../src/img/GcoreDocsImages/Waap/WAAP.png)
-
-   ![WAAP query](../src/img/GcoreDocsImages/Waap/WaapSelect.png)
-
-2. Choose **Metric** (`total_requests` or `total_bytes`) and **Granularity** (`1h` or `1d`).
-
-   ![WAAP metric](../src/img/GcoreDocsImages/Waap/WaapMetric.png)
-
-   ![WAAP granularity](../src/img/GcoreDocsImages/Waap/WaapGranuality.png)
+![FastEdge query editor](src/img/Service%20Images/FastEdgeGraphImage.png)
 
 ---
 
-## Step 4 — Dashboard variables (optional)
+### WAAP
 
-You can drive filters from dashboard variables so users pick resources or other dimensions without editing the query.
+#### What is the WAAP data source?
 
-1. Open dashboard **Settings → Variables → Add variable**.
-2. Choose your Gcore data source and set **Values for** to the dimension you need, for example:
-   - **resourceID** — CDN resources  
-   - **vhost**, **client**, **country**, **region** — other CDN dimensions  
-   - **Zone (DNS)**, **Record type (DNS)**  
-   - **App (FastEdge)**
+The WAAP service view surfaces web application and API protection statistics from Gcore WAAP.
+It is aimed at security and operations teams that need to track attack and traffic patterns over time.
 
-3. Save the variable, return to the dashboard, and reference it in the panel’s **Filters (comma separated)** (for CDN **Resources** or other filter fields as applicable). Use Grafana variable syntax, for example `$my_variable`, in the comma-separated list.
+#### Key features
 
-This mirrors the pattern described in the official CDN Grafana article (filter charts by resource via variables).
+- Visualize high-level WAAP metrics such as total requests and total bytes.
+- Choose between hourly and daily granularity to support both operational and reporting use cases.
+- Configure legend format so WAAP series integrate cleanly into existing dashboards.
+
+#### Find More
+
+If you want to learn more about Gcore WAAP and how its APIs work, see the official documentation at `https://gcore.com/docs/waap` and the API reference at `https://api.gcore.com/docs/waap`.
+
+![WAAP query editor](src/img/Service%20Images/WaapGraphImage.png)
+
+
+## How to start
+---
+
+### Run locally on Windows (Grafana installed on host)
+
+#### Install prerequisites
+
+- Local Grafana install (for example `C:\Program Files\GrafanaLabs\grafana`)
+- Node.js (v14 or newer) and Yarn
+
+#### Install dependencies
+
+From the project root (`Cdnallplugins`):
+
+```bash
+yarn install
+```
+
+#### Build the plugin (frontend + backend)
+
+```bash
+yarn build:all
+```
+
+This bundles the frontend into `dist` and builds backend binaries for Linux and Windows.
+
+#### Copy the plugin into Grafana
+
+Copy the contents of the `dist` directory into Grafana’s plugins folder, for example:
+
+```text
+C:\Program Files\GrafanaLabs\grafana\data\plugins\gcore-stats-datasource-plugin
+```
+
+#### Allow the unsigned plugin
+
+Edit `conf\custom.ini` in your Grafana install and ensure:
+
+```ini
+[plugins]
+allow_loading_unsigned_plugins = gcore-stats-datasource-plugin
+```
+
+#### Restart Grafana and verify
+
+Restart the Grafana service and open:
+
+```text
+http://localhost:3000
+```
+
+Go to **Connections → Data sources → Add data source** and search for **Gcore Platform-EN** (or the name from `plugin.json`).
 
 ---
 
-## Related links
+### Run with Docker (Grafana + plugin)
 
-| Topic | URL |
-| -------- | ----- |
-| CDN Grafana (official) | https://gcore.com/docs/cdn/grafana/view-cdn-statistics-in-grafana |
-| API tokens | https://gcore.com/docs/account-settings/create-use-or-delete-a-permanent-api-token |
-| Grafana restart / install | https://grafana.com/docs/grafana/latest/ |
-| Plugin releases | https://github.com/G-Core/gcore-stats-datasource-plugin/releases |
+#### First-time setup
 
----
+From the project root (`Cdnallplugins`):
 
-## Image index (`src/img/GcoreDocsImages`)
+```bash
+yarn install
+yarn build:all
+```
 
-| Folder | Files |
-| ------ | ----- |
-| `Login/` | `Login.png` |
-| `CDN/` | `CdnSelect.png`, `CdnImage.png`, `CdnMetric.png`, `CdnGranulaity.png`, `CdnGroupby.png` |
-| `DNS/` | `DNS.png`, `DnsSelect.png`, `DnsZone.png`, `DnsRecordType.png`, `DnsGranuality.png` |
-| `FastEdge/` | `FastEdge.png`, `FastedgeSelect.png`, `FastEdgeMetric.png`, `FastEdgeAppName.png`, `FastEdgeStep.png` |
-| `Waap/` | `WAAP.png`, `WaapSelect.png`, `WaapMetric.png`, `WaapGranuality.png` |
+Make sure Docker and Docker Compose are installed.
 
-Paths in this markdown file are relative to the `docs/` directory (for example `../src/img/GcoreDocsImages/...`).
+#### Start Grafana with the plugin (Use Docker)
+
+Recommended (uses the helper script):
+
+```bash
+yarn server
+```
+
+Or call Docker Compose directly:
+
+```bash
+docker compose -f .config/docker-compose-base.yaml up --build
+```
+
+#### Access Grafana
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+Log in (default `admin` / `admin` unless changed) and confirm the `gcore-stats-datasource-plugin` is available under **Connections → Data sources**.
