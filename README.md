@@ -1,12 +1,26 @@
 # Gcore Grafana Data Source Plugin
 
-This plugin connects Grafana to multiple Gcore edge services, providing a unified query model for visualizing both operational and security metrics across **CDN**, **DNS**, **FastEdge**, and **WAAP**, so instead of managing separate datasources or query editors you select the **Service** once and work with a single, consistent panel experience for all four products.
+This plugin connects Grafana to multiple Gcore edge services with a **single, unified data source** and query editor.
 
-## Documentation
+Supported services:
 
-For a **step-by-step guide** (install, API key, panels per product, dashboard variables) in the style of [View CDN statistics in Grafana](https://gcore.com/docs/cdn/grafana/view-cdn-statistics-in-grafana), see **[docs/GcoreDocsMD.md](docs/GcoreDocsMD.md)**. Screenshots use images under `src/img/GcoreDocsImages/`.
+- **CDN**: delivery traffic, bandwidth, cache efficiency, and request statistics
+- **DNS**: authoritative DNS traffic statistics per zone and record type
+- **FastEdge**: application latency and performance metrics from edge applications
+- **WAAP**: web application and API protection statistics (traffic and request analytics)
+
+## Quick start
+
+- **Add the data source**: Grafana → **Connections → Data sources → Add data source** → **Gcore Platform-EN**
+- **API base URL (default)**: `https://api.gcore.com`
+  - If you override it in the data source settings, enter a **hostname only** (no scheme, no path), for example `api.gcore.com`.
+- **API key**: paste your permanent API token into the plugin’s **API key** field
+- **Build panels**:
+  - Create a panel and select this data source
+  - Pick **Service** (CDN / DNS / FastEdge / WAAP), then configure the service-specific query fields.
 
 ## Overview
+
 ---
 
 Grafana supports a wide range of data sources, including Prometheus, MySQL, and Datadog.
@@ -14,12 +28,13 @@ This plugin adds native support for Gcore APIs so you can build dashboards direc
 
 The data source currently supports the following Gcore products:
 
-- **CDN** – delivery traffic, bandwidth, cache efficiency, and request statistics.
-- **FastEdge** – application latency and performance metrics from edge applications.
-- **WAAP** – web application and API protection statistics, including request volumes and traffic data.
-- **DNS** – authoritative DNS traffic statistics per zone and record type.
+- **CDN** : delivery traffic, bandwidth, cache efficiency, and request statistics
+- **FastEdge** : application latency and performance metrics from edge applications
+- **WAAP** : web application and API protection statistics, including request volumes and traffic data
+- **DNS** : authoritative DNS traffic statistics per zone and record type
 
 ## Product-specific capabilities
+
 ---
 
 ### CDN
@@ -38,9 +53,13 @@ It is suited for traffic analysis, capacity planning, and day‑to‑day operati
 
 #### Find More
 
-If you want to learn more about Gcore CDN and how its APIs work, see the official documentation at `https://gcore.com/docs/cdn` and the API reference at `https://gcore.com/docs/api-reference/overview`.
+#### API endpoints
 
-![CDN query editor](src/img/Service%20Images/CDNGraphImage.png)
+`https://api.gcore.com/cdn/statistics/aggregate/stats`
+
+`https://api.gcore.com/cdn/resources`
+
+![CDN query editor](https://raw.githubusercontent.com/G-Core/gcore-stats-datasource-plugin/main/src/img/Service%20Images/CDNGraphImage.png)
 
 ---
 
@@ -60,9 +79,13 @@ It helps you monitor query volume, understand load distribution, and validate DN
 
 #### Find More
 
-If you want to learn more about Gcore DNS and how its APIs work, see the official documentation at `https://gcore.com/docs/dns` and the Managed DNS product page at `https://gcore.com/dns`.
+#### API endpoints
 
-![DNS query editor](src/img/Service%20Images/DnsGraphImage.png)
+`https://api.gcore.com/dns/v2/zones`
+
+`https://api.gcore.com/dns/v2/zones/all/statistics`
+
+![DNS query editor](https://raw.githubusercontent.com/G-Core/gcore-stats-datasource-plugin/main/src/img/Service%20Images/DnsGraphImage.png)
 
 ---
 
@@ -82,11 +105,13 @@ It helps you understand response times, spot regressions, and compare deployment
 
 #### Find More
 
-If you want to learn more about Gcore FastEdge and how its APIs work, see the official documentation at `https://gcore.com/docs/fastedge` and the getting started guide at `https://gcore.com/docs/fastedge/getting-started`.
+#### API endpoints
 
+`https://api.gcore.com/fastedge/v1/apps`
 
+`https://api.gcore.com/fastedge/v1/stats/app_duration`
 
-![FastEdge query editor](src/img/Service%20Images/FastEdgeGraphImage.png)
+![FastEdge query editor](https://raw.githubusercontent.com/G-Core/gcore-stats-datasource-plugin/main/src/img/Service%20Images/FastEdgeGraphImage.png)
 
 ---
 
@@ -105,12 +130,30 @@ It is aimed at security and operations teams that need to track attack and traff
 
 #### Find More
 
-If you want to learn more about Gcore WAAP and how its APIs work, see the official documentation at `https://gcore.com/docs/waap` and the API reference at `https://api.gcore.com/docs/waap`.
+#### API endpoints
 
-![WAAP query editor](src/img/Service%20Images/WaapGraphImage.png)
+`https://api.gcore.com/waap/v1/analytics/requests`
 
+`https://api.gcore.com/waap/v1/statistics/series`
 
-## How to start
+![WAAP query editor](https://raw.githubusercontent.com/G-Core/gcore-stats-datasource-plugin/main/src/img/Service%20Images/WaapGraphImage.png)
+
+## Alerting (Grafana Alerting)
+
+---
+
+This plugin can be used in **Grafana Alerting** because it is a **backend** data source and is marked as `alerting: true` in `plugin.json` (Grafana evaluates alert queries on the server side).
+
+- **How to alert on these metrics**:
+  - Build a panel query using this data source (CDN/DNS/FastEdge/WAAP).
+  - Create an alert rule from that query.
+  - Use Grafana **Expressions** (Reduce/Math/Threshold) to convert a time series into an alert condition.
+
+Grafana docs:
+Refer to the Grafana Alerting documentation for details on alert rules, expressions, and evaluation.
+
+## How to install
+
 ---
 
 ### Run locally on Windows (Grafana installed on host)
@@ -169,7 +212,7 @@ Go to **Connections → Data sources → Add data source** and search for **Gcor
 
 #### First-time setup
 
-From the project root (`Cdnallplugins`):
+From the project root:
 
 ```bash
 yarn install
