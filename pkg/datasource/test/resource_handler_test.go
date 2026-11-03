@@ -82,6 +82,40 @@ func TestGCDataSource_CallResource_KeepsRealQueryParams(t *testing.T) {
 	}
 }
 
+func TestGCDataSource_CallResource_RejectsNonGETMethods(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	mux := http.NewServeMux()
+	mux.HandleFunc("/dns/v2/zones", func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusOK)
+	})
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+
+	ds := datasource.NewDataSource(srv.URL, "secret")
+	ds.Client = srv.Client()
+
+	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
+		sender := &recordingResourceSender{}
+		err := ds.CallResource(context.Background(), &backend.CallResourceRequest{
+			Path:   "dns/zones",
+			Method: method,
+			URL:    "dns/zones",
+		}, sender)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if sender.resp == nil || sender.resp.Status != http.StatusMethodNotAllowed {
+			t.Fatalf("method %s: response %+v, want 405", method, sender.resp)
+		}
+	}
+	if called {
+		t.Fatal("upstream was called despite disallowed method")
+	}
+}
+
 func TestGCDataSource_CallResource_PathFromURLWhenPathEmpty(t *testing.T) {
 	t.Parallel()
 
