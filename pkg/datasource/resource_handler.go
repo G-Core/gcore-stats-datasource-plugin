@@ -23,6 +23,10 @@ func sendJSONError(sender backend.CallResourceResponseSender, status int, msg st
 }
 
 func (ds *GCDataSource) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+	if req.Method != http.MethodGet {
+		sendJSONError(sender, 405, "method not allowed")
+		return nil
+	}
 	subpath := resourceSubpath(req.Path, req.URL)
 	if subpath == "" {
 		sendJSONError(sender, 400, "missing path")
