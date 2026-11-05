@@ -43,6 +43,7 @@
   "routes": [
     {
       "path": "cdn/statistics/aggregate/stats",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/cdn/statistics/aggregate/stats",
       "headers": [
         {
@@ -53,6 +54,7 @@
     },
     {
       "path": "cdn/resources",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/cdn/resources",
       "headers": [
         {
@@ -63,6 +65,7 @@
     },
     {
       "path": "dns/zones",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{.JsonData.apiUrl}}{{else}}api.gcore.com{{end}}/dns/v2/zones",
       "headers": [
         {
@@ -73,6 +76,7 @@
     },
     {
       "path": "dns/zones/all/statistics",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{.JsonData.apiUrl}}{{else}}api.gcore.com{{end}}/dns/v2/zones/all/statistics",
       "headers": [
         {
@@ -83,6 +87,7 @@
     },
     {
       "path": "fastedge/apps",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/fastedge/v1/apps",
       "headers": [
         {
@@ -93,6 +98,7 @@
     },
     {
       "path": "fastedge/stats/app_duration",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/fastedge/v1/stats/app_duration",
       "headers": [
         {
@@ -103,6 +109,7 @@
     },
     {
       "path": "waap/analytics/requests",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/waap/v1/analytics/requests",
       "headers": [
         {
@@ -113,6 +120,7 @@
     },
     {
       "path": "waap/statistics/series",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl }}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/waap/v1/statistics/series",
       "headers": [
         {
@@ -123,6 +131,7 @@
     },
     {
       "path": "users/me",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/users/me",
       "headers": [
         {
@@ -133,6 +142,7 @@
     },
     {
       "path": "iam/users/me",
+      "method": "GET",
       "url": "https://{{if .JsonData.apiUrl}}{{ .JsonData.apiUrl }}{{else}}api.gcore.com{{end}}/iam/users/me",
       "headers": [
         {
